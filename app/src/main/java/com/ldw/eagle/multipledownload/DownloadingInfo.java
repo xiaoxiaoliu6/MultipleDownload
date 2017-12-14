@@ -8,9 +8,9 @@ package com.ldw.eagle.multipledownload;
  */
 public class DownloadingInfo {
 
-	private String kbps = "0"; // 每秒下载速度
-	private int secondSize = 0; // 一秒钟累计下载量
-	private int fileSize = 0; // 文件大小
+	private String kbps = "0";
+	private int secondSize = 0;
+	private int fileSize = 0;
 
 	public String getKbps() {
 		return kbps;

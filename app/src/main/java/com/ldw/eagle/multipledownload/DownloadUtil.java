@@ -13,7 +13,6 @@ import java.util.Map.Entry;
 
 
 /**
-
  eagle
  *
  */
@@ -24,9 +23,9 @@ public class DownloadUtil {
 	private List<String> downloadList = null;
 	private Map<String,DownloadHttpTool> downloadMap = null;
 	private int currentUrlIndex = -1;
-	private final int MAX_COUNT = 2; // 最大并行下载量
-	private int currentCount = 0; // 当前并行下载量
-	private final String FLAG_FREE = "free"; // 标记downloadMap中空闲的DownloadHttpTool实例
+	private final int MAX_COUNT = 2;
+	private int currentCount = 0;
+	private final String FLAG_FREE = "free";
 	private OnDownloadListener onDownloadListener = null;
 
 	private Handler mHandler = new Handler() {
@@ -70,10 +69,6 @@ public class DownloadUtil {
 		return instance;
 	}
 
-	/**
-	 * 下载之前的准备工作，并自动开始下载
-	 *
-	 */
 	public void prepare(String urlString) {
 		downloadList.add(urlString);
 		if (currentCount < MAX_COUNT) {
@@ -83,9 +78,7 @@ public class DownloadUtil {
 		}
 	}
 
-	/**
-	 * 开始下载
-	 */
+
 	private synchronized void start() {
 		if (++currentUrlIndex >= downloadList.size()) {
 			currentUrlIndex--;
@@ -110,7 +103,6 @@ public class DownloadUtil {
 		downloadHttpTool.start(urlString);
 	}
 
-	/** 暂停当前下载任务 */
 	public void pause(String urlString) {
 		paused(urlString, new Paused() {
 
@@ -121,10 +113,9 @@ public class DownloadUtil {
 		});
 	}
 
-	/** 暂停所有的下载任务 */
+
 	public void pauseAll() {
-		// 如果需要边遍历集合边删除数据，需要从后向前遍历，否则会出异常（Caused by:
-		// java.util.ConcurrentModificationException）
+
 		String[] keys = new String[downloadMap.size()];
 		downloadMap.keySet().toArray(keys);
 		for (int i = keys.length - 1; i >= 0; i--) {
@@ -133,24 +124,19 @@ public class DownloadUtil {
 		instance = null;
 	}
 
-	/**
-	 * 恢复当前下载任务
-	 * 
-	 * @param urlString
-	 *            要恢复下载的文件的地址
-	 */
+
 	public void resume(String urlString) {
 		prepare(urlString);
 	}
 
-	/** 恢复所有的下载任务 */
+
 	public void resumeAll() {
 		for (Entry<String, DownloadHttpTool> entity : downloadMap.entrySet()) {
 			prepare(entity.getKey());
 		}
 	}
 
-	/** 删除当前下载任务 */
+
 	public void delete(String urlString) {
 		boolean bool = paused(urlString, new Paused() {
 
@@ -160,7 +146,7 @@ public class DownloadUtil {
 				downloadHttpTool.delete();
 			}
 		});
-		if (!bool) { // 下载任务不存在，直接删除临时文件
+		if (!bool) {
 			File file = new File(DownloadHttpTool.filePath + "/"
 					+ urlString.split("/")[urlString.split("/").length - 1]
 					+ DownloadHttpTool.FILE_TMP_SUFFIX);
@@ -172,13 +158,6 @@ public class DownloadUtil {
 		void onPaused(DownloadHttpTool downloadHttpTool);
 	}
 
-	/**
-	 * 暂停
-	 * 
-	 * @param urlString
-	 * @param paused
-	 * @return 下载任务是否存在的标识
-	 */
 	private boolean paused(String urlString, Paused paused) {
 		if (downloadMap.containsKey(urlString)) {
 			currentCount--;
@@ -199,52 +178,31 @@ public class DownloadUtil {
 
 		@Override
 		public void onComplated(String urlString) {
-			System.out.println("下载完成____" + urlString);
+			LogUtils.d("下载完成____" + urlString);
 			Message msg = new Message();
 			msg.what = 2;
 			msg.obj = urlString;
 			mHandler.sendMessage(msg);
 			pause(urlString);
-			// 满足此条件说明全部下载结束
+
 			if (downloadMap.size() == 1 && downloadMap.containsKey(FLAG_FREE)) {
-				System.out.println("全部下载结束");
+				LogUtils.d("全部下载结束");
 			}
 		}
 	};
 
-	/** 设置下载监听 */
 	public void setOnDownloadListener(OnDownloadListener onDownloadListener) {
 		this.onDownloadListener = onDownloadListener;
 	}
 
-	/** 下载回调接口 */
 	public interface OnDownloadListener {
 
-		/**
-		 * 下载开始回调接口
-		 * 
-		 * @param url
-		 * @param fileSize
-		 *            目标文件大小
-		 */
 		public void downloadStart(String url, int fileSize);
 
-		/**
-		 * 下载进度回调接口
-		 * 
-		 * @param
-		 * @param downloadedSize
-		 *            已下载大小
-		 * @param lenth
-		 *            本次下载大小
-		 */
+
 		public void downloadProgress(String url, int downloadedSize, int length);
 
-		/**
-		 * 下载完成回调
-		 * 
-		 * @param url
-		 */
+
 		public void downloadEnd(String url);
 
 	}

@@ -17,41 +17,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 利用Http协议进行多线程下载具体实现类
- * 
+
  * eagle
  */
 public class DownloadHttpTool {
 
-	private final int THREAD_COUNT = 2; // 线程数量
-	private String urlstr = ""; // URL地址
+	private final int THREAD_COUNT = 3;
+	private String urlstr = "";
 	private Context mContext = null;
-	private List<DownloadInfo> downloadInfos = null; // 保存下载信息的类
-	/** 下载文件保存路径 */
-	public static String filePath = ""; // 目录
-	private String fileName = ""; // 文件名
-	private String fileNameTmp = ""; // 临时文件名
-	/** 临时文件名后缀 */
+	private List<DownloadInfo> downloadInfos = null;
+
+	public static String filePath = "";
+	private String fileName = "";
+	private String fileNameTmp = "";
+
 	public static final String FILE_TMP_SUFFIX = ".tmp";
-	private int fileSize = 0; // 文件大小
-	private DownlaodSqlTool sqlTool = null; // 文件信息保存的数据库操作类
+	private int fileSize = 0;
+	private DownlaodSqlTool sqlTool = null;
 	private DownloadComplated downloadComplated = null;
-	private int totalCompelete = 0;// 所有线程已下载的总数
-	private List<DownloadThread> threads = null; // 下载线程
+	private int totalCompelete = 0;
+	private List<DownloadThread> threads = null;
 	private Handler handler = null;
 
-	// 利用枚举表示下载的几种状态
 	private enum Download_State {
-		Downloading, Pause, Ready, Compeleted, Exception;
+		Downloading, Pause, Ready, Completed, Exception;
 	}
 
-	private Download_State state = Download_State.Ready; // 当前下载状态
+	private Download_State state = Download_State.Ready; // 下载状态
 
-	/**
-	 * @param context
-	 *            上下文对象
-	 * @param downloadComplated
-	 */
+
 	public DownloadHttpTool(Context context, Handler handler,
 			DownloadComplated downloadComplated) {
 		super();
@@ -60,19 +54,13 @@ public class DownloadHttpTool {
 		this.downloadComplated = downloadComplated;
 		sqlTool = DownlaodSqlTool.getInstance(mContext);
 		if ("".equals(filePath)) {
-			// TODO 根据有无sdcard设置路径
 			filePath = Environment.getExternalStorageDirectory()
-					.getAbsolutePath() + "/meiriq-download";
+					.getAbsolutePath() + "/eagleDownload";
 		}
 		threads = new ArrayList<DownloadThread>();
 	}
 
-	/**
-	 * 开始下载
-	 * 
-	 * @param url
-	 *            下载地址
-	 */
+
 	public void start(String urlstr) {
 		this.urlstr = urlstr;
 		String[] ss = urlstr.split("/");
@@ -83,7 +71,7 @@ public class DownloadHttpTool {
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				// 下载之前首先异步线程调用ready方法做下载的准备工作
+
 				ready();
 				Message msg = new Message();
 				msg.what = 1;
@@ -96,13 +84,12 @@ public class DownloadHttpTool {
 			@Override
 			protected void onPostExecute(Void result) {
 				super.onPostExecute(result);
-				// 开始下载
 				startDownload();
 			}
 		}.execute();
 	}
 
-	/** 在开始下载之前需要调用ready方法进行配置 */
+
 	private void ready() {
 		if (new File(filePath + "/" + fileName).exists()) {
 			downloadComplated.onComplated(urlstr);
@@ -110,7 +97,7 @@ public class DownloadHttpTool {
 		}
 		totalCompelete = 0;
 		downloadInfos = sqlTool.getInfos(urlstr);
-		if (downloadInfos.size() == 0) { // 数据库中没有相关信息
+		if (downloadInfos.size() == 0) {
 			initFirst();
 		} else {
 			File file = new File(filePath + "/" + fileNameTmp);
@@ -121,59 +108,59 @@ public class DownloadHttpTool {
 				fileSize = downloadInfos.get(downloadInfos.size() - 1)
 						.getEndPos();
 				for (DownloadInfo info : downloadInfos) {
-					totalCompelete += info.getCompeleteSize();
+					totalCompelete += info.getCompleteSize();
 				}
 			}
 		}
 	}
 
-	/** 开始下载 */
+
 	private void startDownload() {
 		if (downloadInfos != null) {
 			if (state == Download_State.Downloading) {
 				return;
 			}
 			state = Download_State.Downloading;
-			for (DownloadInfo info : downloadInfos) { // 开启线程下载
+			for (DownloadInfo info : downloadInfos) {
 				DownloadThread thread = new DownloadThread(info.getThreadId(),
 						info.getStartPos(), info.getEndPos(),
-						info.getCompeleteSize(), info.getUrl());
+						info.getCompleteSize(), info.getUrl());
 				thread.start();
 				threads.add(thread);
 			}
 		}
 	}
 
-	/** 暂停当前下载任务 */
+
 	public void pause() {
 		state = Download_State.Pause;
 	}
 
-	/** 删除当前下载任务 */
+
 	public void delete() {
 		compeleted();
 		File file = new File(filePath + "/" + fileNameTmp);
 		file.delete();
 	}
 
-	/** 完成下载 */
+
 	private void compeleted() {
-		state = Download_State.Compeleted;
+		state = Download_State.Completed;
 		sqlTool.delete(urlstr);
 		downloadComplated.onComplated(urlstr);
 	}
 
-	/** 获取目标文件大小 */
+
 	public int getFileSize() {
 		return fileSize;
 	}
 
-	/** 获取当前下载的大小 */
+
 	public int getTotalCompeleteSize() {
 		return totalCompelete;
 	}
 
-	/** 第一次下载时进行的初始化 */
+
 	private void initFirst() {
 		URL url = null;
 		RandomAccessFile accessFile = null;
@@ -196,7 +183,7 @@ public class DownloadHttpTool {
 			if (!file.exists()) {
 				file.createNewFile();
 			}
-			// 随机访问文件
+
 			accessFile = new RandomAccessFile(file, "rwd");
 			accessFile.setLength(fileSize);
 		} catch (MalformedURLException e) {
@@ -312,7 +299,7 @@ public class DownloadHttpTool {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("异常退出____" + urlstr);
+				System.out.println(new StringBuilder().append("异常退出____").append(urlstr).append("---->").append(e.getMessage()).toString());
 				state = Download_State.Exception;
 			} finally {
 				// 不管发生了什么事，都要保存下载信息到数据库

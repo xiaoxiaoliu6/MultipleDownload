@@ -24,7 +24,7 @@ public class DownLoadHelper extends SQLiteOpenHelper {
 		db.execSQL("create table "
 				+ TB_NAME
 				+ "(_id integer PRIMARY KEY AUTOINCREMENT, thread_id integer, "
-				+ "start_pos integer, end_pos integer, compelete_size integer,url char)");
+				+ "start_pos integer, end_pos integer, complete_size integer,url char)");
 	}
 
 	@Override

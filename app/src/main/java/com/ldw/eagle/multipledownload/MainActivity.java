@@ -38,9 +38,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		listView = (ListView) findViewById(R.id.listview);
 
 		urls = new ArrayList<String>();
-		urls.add("http://pc1.gamedog.cn/big/game/dongzuo/102631/shenmiaotw2_yxdog.apk");
-		urls.add("http://pc1.gamedog.cn/big/game/yizhi/67450/baoweiluobo_an_yxdog.apk");
-		urls.add("http://pc1.gamedog.cn/big/game/yizhi/161623/zhiwudzjs2gqb_an.apk");
+		urls.add("http://downali.game.uc.cn/s/0/8/2017121314101587a837_1207.apk");
+		urls.add("http://downali.game.uc.cn/s/4/4/20171030105034b47fff_lign_80J7wutF_de3e385ce05a471ec24425e0f4a82925.apk?x-oss-process=udf/uc-apk,AiDDjE0cKF5iAsOP685d30cfd95309c8&sh=10&sf=434680082&vh=451033f2765803d6880d8583b7c84be8&cc=1627710755");
+		urls.add("http://downali.game.uc.cn/s/4/12/201509081724093dff03_warriors_0908_uc.apk?x-oss-process=udf/uc-apk,AiDDjEgdLV1nAsONea8876902e7393eb");
 
 		listView.setAdapter(myAdapter);
 
