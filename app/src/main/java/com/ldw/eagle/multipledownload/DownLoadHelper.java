@@ -5,8 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * 利用数据库来记录下载信息
- * 
  * eagle
  */
 public class DownLoadHelper extends SQLiteOpenHelper {

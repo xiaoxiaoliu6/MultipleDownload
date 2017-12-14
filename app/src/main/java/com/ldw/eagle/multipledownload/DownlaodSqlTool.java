@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 数据库操作工具类
- * 
+ *
  * eagle
  */
 public class DownlaodSqlTool {

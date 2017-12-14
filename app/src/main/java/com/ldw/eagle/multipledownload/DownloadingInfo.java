@@ -1,8 +1,6 @@
 package com.ldw.eagle.multipledownload;
 
 /**
-
-
  *eagle
  * 
  */

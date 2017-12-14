@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
-
  * eagle
  */
 public class DownloadHttpTool {

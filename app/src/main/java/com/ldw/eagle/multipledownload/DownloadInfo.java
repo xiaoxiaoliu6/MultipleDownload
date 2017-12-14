@@ -1,8 +1,6 @@
 package com.ldw.eagle.multipledownload;
 
 /**
- * 保存每个下载线程下载信息类
- * 
  * eagle
  */
 public class DownloadInfo {
